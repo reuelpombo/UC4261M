@@ -1,51 +1,36 @@
+
+
+
+
 export class Cachorro {
-    // 1. Atributos privados
-    private _nome: string
-    private _raca: string
-    private _idade: number
+    private nome: string
+    private raca: string
+    private peso: number
 
-    // 2. Construtor
-    constructor(nome: string, raca: string, idade: number) {
-        this._nome = nome
-        this._raca = raca
-        this._idade = idade < 0 ? 0 : idade // Validação simples para idade não começar negativa
+    constructor(nome: string, raca: string, peso: number) {
+        this.nome = nome
+        this.raca = raca
+        this.peso = peso
+    }
+    getNome(): string {
+        return this.nome;
+    }
+    setNome(novoNome: string): void {
+        this.nome = novoNome;
+    }
+    getraca(): string {
+        return this.raca
     }
 
-    // 3. Getters e Setters (2 para cada atributo = 6 métodos no total)
-
-    // Getter e Setter para 'nome'
-    get nome(): string {
-        return this._nome
+    setraca(novoRaca: string): void {
+        this.raca = novoRaca
     }
 
-    set nome(novoNome: string) {
-        this._nome = novoNome
+    getPeso(): number {
+        return this.peso
     }
 
-    // Getter e Setter para 'raca'
-    get raca(): string {
-        return this._raca
-    }
-
-    set raca(novaRaca: string) {
-        this._raca = novaRaca
-    }
-
-    // Getter e Setter para 'idade'
-    get idade(): number {
-        return this._idade
-    }
-
-    set idade(novaIdade: number) {
-        if (novaIdade < 0) {
-            console.log("A idade não pode ser negativa!")
-        } else {
-            this._idade = novaIdade
-        }
-    }
-
-    // Método extra para demonstrar o comportamento
-    latir(): void {
-        console.log(`${this._nome} está latindo: Au Au!`)
+    setPeso(novoPeso: number): void {
+        this.peso = novoPeso
     }
 }

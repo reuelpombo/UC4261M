@@ -1,21 +1,22 @@
-import { Cachorro } from "./Cachorro"
+// import { Personagem } from "./Personagem";
 
-// Criando 3 cachorros diferentes
-const dog1 = new Cachorro("Thor", "Golden Retriever", 3)
-const dog2 = new Cachorro("Mel", "Poodle", 5)
-const dog3 = new Cachorro("Spike", "Bulldog", 2)
+// const personagem: Personagem = new Personagem("fulano", 100, 10);
 
-// Usando os Getters para ler os dados
-console.log(`Cachorro 1: ${dog1.nome}, Raça: ${dog1.raca}, Idade: ${dog1.idade} anos`)
-console.log(`Cachorro 2: ${dog2.nome}, Raça: ${dog2.raca}, Idade: ${dog2.idade} anos`)
+// console.log(personagem.getVida());
 
-// Usando os Setters para modificar dados com segurança
-dog3.idade = 4 // Atualizando a idade usando o setter
-dog3.nome = "Spike Junior" // Atualizando o nome
+import { Cachorro, } from "./Cachorro";
+const cachorro:Cachorro = new Cachorro("preus", "pitbul", 14)
+const outroCahorro:Cachorro = new Cachorro("pett", "viralata", 16)
+const novoCachorro:Cachorro = new Cachorro("darius", "doberman", 3)
 
-console.log(`Cachorro 3 atualizado: ${dog3.nome}, Raça: ${dog3.raca}, Idade: ${dog3.idade} anos`)
+console.log(cachorro.getNome());
+console.log(cachorro.getraca());
+console.log(cachorro.getPeso());
 
-// Chamando métodos da classe
-dog1.latir()
-dog2.latir()
-dog3.latir()
+console.log(outroCahorro.getNome());
+console.log(outroCahorro.getraca());
+console.log(outroCahorro.getPeso());
+
+console.log(novoCachorro.getNome());
+console.log(novoCachorro.getraca());
+console.log(novoCachorro.getPeso())

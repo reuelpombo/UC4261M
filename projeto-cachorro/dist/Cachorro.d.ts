@@ -1,14 +1,13 @@
 export declare class Cachorro {
-    private _nome;
-    private _raca;
-    private _idade;
-    constructor(nome: string, raca: string, idade: number);
-    get nome(): string;
-    set nome(novoNome: string);
-    get raca(): string;
-    set raca(novaRaca: string);
-    get idade(): number;
-    set idade(novaIdade: number);
-    latir(): void;
+    private nome;
+    private raca;
+    private peso;
+    constructor(nome: string, raca: string, peso: number);
+    getNome(): string;
+    setNome(novoNome: string): void;
+    getraca(): string;
+    setraca(novoRaca: string): void;
+    getPeso(): number;
+    setPeso(novoPeso: number): void;
 }
 //# sourceMappingURL=Cachorro.d.ts.map
