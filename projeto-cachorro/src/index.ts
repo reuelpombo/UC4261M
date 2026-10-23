@@ -20,3 +20,5 @@ console.log(outroCahorro.getPeso());
 console.log(novoCachorro.getNome());
 console.log(novoCachorro.getraca());
 console.log(novoCachorro.getPeso())
+console.log(novoCachorro.getraca())
+
