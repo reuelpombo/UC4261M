@@ -1,0 +1,23 @@
+"use strict";
+// essa classe vai ser a classe PAI main 
+Object.defineProperty(exports, "__esModule", { value: true });
+// export class Mamifero {
+// private nome: string
+// protected patas: number         // atributos
+// private pelo: string
+// constructor(nome:string, patas:number, pelo:string) {
+//     this.nome = nome
+//     this.patas = patas     //construtor
+//     this.pelo = pelo
+// }
+// fazerSom():void {
+//     console.log(`${this.nome} está fazendo um barulho.`);
+// }
+// getNome():string{
+// return this.nome
+// }
+// setNome(novoNome:string):void {;
+//  this.nome = novoNome;
+// }
+// }
+//# sourceMappingURL=Mamifero.js.map
