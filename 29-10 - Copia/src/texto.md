@@ -1,0 +1,1 @@
+Crie uma classe Pagamento com um método processar(). Depois crie CartaoCredito e Boleto, cada um implementando a lógica do pagamento de forma diferente. Crie um array de pagamentos e processe todos usando polimorfismo.
