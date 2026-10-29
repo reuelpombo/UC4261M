@@ -1,0 +1,23 @@
+{
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  },
+  "name": "uc4",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/reuelpombo/UC4261M.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/reuelpombo/UC4261M/issues"
+  },
+  "homepage": "https://github.com/reuelpombo/UC4261M#readme",
+  "description": ""
+}
