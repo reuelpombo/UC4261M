@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TôContigo — Registro e Acompanhamento do Paciente</title>
+    <!-- Carregando Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonte Google Fonts arredondada e acessível (Plus Jakarta Sans & Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        petrol: {
+                            DEFAULT: '#0f4c5c',
+                            dark: '#09333e',
+                            light: '#16697a',
+                        },
+                        turquoise: {
+                            DEFAULT: '#14b8a6',
+                            dark: '#0d9488',
+                            light: '#ccfbf1',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between antialiased selection:bg-turquoise/20 selection:text-petrol">
+
+    <!-- Cabeçalho Principal -->
+    <header class="bg-white border-b border-slate-200/80 shadow-sm sticky top-0 z-10">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <!-- Ícone SVG representando elos e cuidado em saúde -->
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-petrol to-turquoise flex items-center justify-center shadow-md shadow-turquoise/20 text-white shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                        <path d="M12 7v6"/>
+                        <path d="M9 10h6"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="font-display text-2xl font-extrabold tracking-tight text-petrol leading-none">
+                        Tô<span class="text-turquoise">Contigo</span>
+                    </h1>
+                    <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1">
+                        O cuidado que te acompanha — Registro e Acompanhamento do Paciente
+                    </p>
+                </div>
+            </div>
+
+            <!-- Badge de Segurança LGPD para destaque no Hackathon -->
+            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-200/70 text-petrol text-xs font-semibold">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-turquoise-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                <span>Dados Protegidos • LGPD</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="flex-grow max-w-3xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-10">
+        
+        <!-- Banner de Feedback / Notificação Dinâmica -->
+        <div id="toast-banner" class="hidden mb-6 p-4 rounded-2xl border flex items-center justify-between gap-3 transition-all duration-300 shadow-sm" role="alert">
+            <div class="flex items-center gap-3">
+                <span id="toast-icon" class="shrink-0"></span>
+                <p id="toast-message" class="text-sm font-medium"></p>
+            </div>
+            <button type="button" onclick="hideToast()" class="text-current opacity-70 hover:opacity-100 p-1 rounded-lg transition-opacity" aria-label="Fechar aviso">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Cartão Centralizado de Prontuário Rápido -->
+        <section class="bg-white rounded-3xl shadow-lg shadow-slate-200/60 border border-slate-100 overflow-hidden">
+            
+            <!-- Topo do Cartão -->
+            <div class="bg-gradient-to-r from-petrol to-petrol-light px-6 sm:px-8 py-5 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <span class="text-xs uppercase tracking-wider font-semibold text-teal-200">Prontuário Unificado</span>
+                        <h2 class="font-display text-lg sm:text-xl font-bold mt-0.5">Nova Evolução / Registro Clínico</h2>
+                    </div>
+                    <div class="hidden sm:flex items-center justify-center w-10 h-10 rounded-xl bg-white/10 backdrop-blur-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-teal-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                            <line x1="10" y1="9" x2="8" y2="9"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulário de Registro -->
+            <form id="patient-form" class="p-6 sm:p-8 space-y-6" novalidate>
+                
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                    <!-- Campo: Nome -->
+                    <div class="md:col-span-7">
+                        <label for="nome" class="block text-sm font-semibold text-petrol mb-2">
+                            Nome Completo do Paciente <span class="text-rose-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="12" cy="7" r="4"/>
+                                </svg>
+                            </div>
+                            <input 
+                                type="text" 
+                                id="nome" 
+                                name="nome" 
+                                placeholder="Ex: Maria Helena da Silva" 
+                                required
+                                class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-turquoise focus:border-turquoise transition-all text-sm sm:text-base"
+                            >
+                        </div>
+                        <p id="error-nome" class="hidden text-xs text-rose-600 font-medium mt-1.5">Por favor, informe o nome completo do paciente.</p>
+                    </div>
+
+                    <!-- Campo: CPF -->
+                    <div class="md:col-span-5">
+                        <label for="cpf" class="block text-sm font-semibold text-petrol mb-2">
+                            CPF <span class="text-rose-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect width="18" height="14" x="3" y="5" rx="2"/>
+                                    <line x1="7" y1="10" x2="11" y2="10"/>
+                                    <line x1="7" y1="14" x2="17" y2="14"/>
+                                </svg>
+                            </div>
+                            <input 
+                                type="text" 
+                                id="cpf" 
+                                name="cpf" 
+                                inputmode="numeric"
+                                maxlength="14"
+                                placeholder="000.000.000-00" 
+                                required
+                                class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-turquoise focus:border-turquoise transition-all text-sm sm:text-base font-mono"
+                            >
+                        </div>
+                        <p id="error-cpf" class="hidden text-xs text-rose-600 font-medium mt-1.5">Informe um CPF válido com 11 dígitos.</p>
+                    </div>
+                </div>
+
+                <!-- Campo: Anotações -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label for="anotacoes" class="block text-sm font-semibold text-petrol">
+                            Anotações Clínicas e Acompanhamento <span class="text-rose-500">*</span>
+                        </label>
+                        <span id="char-count" class="text-xs text-slate-400 font-medium">0 caracteres</span>
+                    </div>
+                    <textarea 
+                        id="anotacoes" 
+                        name="anotacoes" 
+                        rows="5" 
+                        maxlength="500"
+                        placeholder="Descreva sintomas relatados, medicações em uso, alergias, sinais vitais ou orientações para continuidade do cuidado..."
+                        required
+                        class="w-full p-4 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-turquoise focus:border-turquoise transition-all text-sm sm:text-base leading-relaxed resize-y"
+                    ></textarea>
+                    <p id="error-anotacoes" class="hidden text-xs text-rose-600 font-medium mt-1.5">Insira as anotações de acompanhamento do paciente.</p>
+                </div>
+
+                <!-- Botões de Ação -->
+                <div class="pt-4 border-t border-slate-100 flex flex-col-reverse sm:flex-row items-center justify-end gap-3 sm:gap-4">
+                    <!-- Botão Cancelar -->
+                    <button 
+                        type="button" 
+                        id="btn-cancelar"
+                        class="w-full sm:w-auto px-6 py-3.5 rounded-xl border-2 border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-100 hover:text-slate-800 hover:border-slate-300 active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                        <span>Cancelar</span>
+                    </button>
+
+                    <!-- Botão SALVAR -->
+                    <button 
+                        type="submit" 
+                        id="btn-salvar"
+                        class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-petrol to-turquoise-dark hover:from-petrol-dark hover:to-turquoise text-white font-display font-bold text-sm tracking-wide shadow-md shadow-turquoise/25 hover:shadow-lg hover:shadow-turquoise/30 active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>SALVAR</span>
+                    </button>
+                </div>
+
+            </form>
+        </section>
+
+        <div class="mt-6 flex justify-center">
+            <button type="button" id="btn-ver-registros"
+                class="px-6 py-3 rounded-xl bg-petrol text-white font-semibold hover:bg-petrol-light transition-all shadow-md">
+                Ver registros do paciente
+            </button>
+        </div>
+
+        <!-- Prévia de Histórico Recente (Demonstrativo para o Hackathon) -->
+        <section id="history-section" class="mt-8 hidden">
+            <div class="flex items-center justify-between mb-4 px-1">
+                <h3 class="font-display text-base font-bold text-petrol flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-turquoise inline-block"></span>
+                    Histórico de Registros do Paciente
+                </h3>
+                <span id="records-badge" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-petrol/10 text-petrol">0 registros</span>
+            </div>
+            <div id="records-list" class="space-y-3">
+                <!-- Cards inseridos dinamicamente via JS -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Rodapé Minimalista -->
+    <footer class="py-6 text-center text-xs text-slate-400 border-t border-slate-200/60 bg-white/50">
+        <p><strong class="text-petrol font-semibold">TôContigo</strong> • Continuidade do Cuidado e Acesso Seguro à Saúde</p>
+    </footer>
+
+    <script src="index.js"></script>
+</body>
+</html>

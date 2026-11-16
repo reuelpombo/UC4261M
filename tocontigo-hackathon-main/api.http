@@ -1,0 +1,45 @@
+@baseUrl = http://localhost:3000
+@pacienteId = 1
+@registroId = 1
+
+### TESTE 1 - Verificar se a API funciona
+GET {{baseUrl}}/health
+
+### TESTE 2 - Cadastrar paciente
+POST {{baseUrl}}/pacientes
+Content-Type: application/json
+
+{
+  "nome": "Maria da Silva",
+  "cpf": "12345678909",
+  "data_nascimento": "1950-03-12"
+}
+
+### TESTE 3 - Buscar paciente pelo ID
+GET {{baseUrl}}/pacientes/{{pacienteId}}
+
+### TESTE 4 - Criar registro
+POST {{baseUrl}}/pacientes/{{pacienteId}}/registros
+Content-Type: application/json
+
+{
+  "mensagem": "Hoje senti tontura após tomar meu medicamento."
+}
+
+### TESTE 5 - Listar registros do paciente
+GET {{baseUrl}}/pacientes/{{pacienteId}}/registros
+
+### TESTE 6 - Buscar registro pelo ID
+GET {{baseUrl}}/registros/{{registroId}}
+
+### TESTE 7 - Atualizar registro
+PUT {{baseUrl}}/registros/{{registroId}}
+Content-Type: application/json
+
+{
+  "mensagem": "A tontura passou depois de algumas horas."
+}
+
+### TESTE 8 - Excluir registro
+DELETE {{baseUrl}}/registros/{{registroId}}
+

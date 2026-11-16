@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TôContigo — Protótipo Interativo Hackathon SUS</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fontes Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        petrol: {
+                            DEFAULT: '#0f4c5c',
+                            dark: '#09333e',
+                            light: '#16697a',
+                        },
+                        turquoise: {
+                            DEFAULT: '#14b8a6',
+                            dark: '#0d9488',
+                            light: '#ccfbf1',
+                        },
+                        surface: '#f4f7f8',
+                        wa: {
+                            header: '#075e54',
+                            teal: '#128c7e',
+                            bg: '#efeae2',
+                            sent: '#d9fdd3',
+                            received: '#ffffff'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Padrão sutil de fundo estilo WhatsApp */
+        .wa-chat-bg {
+            background-color: #efeae2;
+            background-image: radial-gradient(#d5cfc4 0.85px, transparent 0.85px);
+            background-size: 18px 18px;
+        }
+        /* Barra de rolagem discreta */
+        .custom-scroll::-webkit-scrollbar {
+            width: 5px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: rgba(15, 76, 92, 0.2);
+            border-radius: 9999px;
+        }
+        /* Animação dos pontos de digitando */
+        @keyframes bounceDot {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        .dot-1 { animation: bounceDot 1.4s infinite ease-in-out both; animation-delay: -0.32s; }
+        .dot-2 { animation: bounceDot 1.4s infinite ease-in-out both; animation-delay: -0.16s; }
+        .dot-3 { animation: bounceDot 1.4s infinite ease-in-out both; }
+
+        /* Destaque suave para novos itens sincronizados */
+        @keyframes highlightPulse {
+            0% { background-color: #ccfbf1; transform: translateY(-4px); }
+            100% { background-color: #ffffff; transform: translateY(0); }
+        }
+        .sync-highlight {
+            animation: highlightPulse 2.2s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-surface text-slate-800 min-h-screen flex flex-col antialiased selection:bg-turquoise/20 selection:text-petrol">
+
+    <!-- Cabeçalho Superior -->
+    <header class="bg-white border-b border-slate-200/90 shadow-sm sticky top-0 z-30">
+        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
+            <!-- Marca TôContigo -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-petrol to-turquoise flex items-center justify-center shadow-md shadow-turquoise/20 text-white shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                        <path d="M12 7v6"/>
+                        <path d="M9 10h6"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="font-display text-xl sm:text-2xl font-extrabold tracking-tight text-petrol leading-none">
+                            Tô<span class="text-turquoise">Contigo</span>
+                        </h1>
+                        <span class="hidden md:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-teal-50 border border-teal-200 text-petrol text-xs font-semibold">
+                            <span class="w-1.5 h-1.5 rounded-full bg-turquoise animate-pulse"></span>
+                            Protótipo Hackathon SUS • Simulação Interativa
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-500 font-medium mt-0.5">
+                        O cuidado que te acompanha — Integração WhatsApp do Paciente &amp; Prontuário UBS
+                    </p>
+                </div>
+            </div>
+
+            <!-- Ações do Cabeçalho -->
+            <div class="flex items-center gap-2.5">
+                <span class="md:hidden inline-flex items-center gap-1 px-2 py-1 rounded-full bg-teal-50 border border-teal-200 text-petrol text-[11px] font-semibold">
+                    Simulação SUS
+                </span>
+                <button 
+                    type="button" 
+                    onclick="resetDemo()" 
+                    class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-petrol hover:text-white text-petrol font-semibold text-xs sm:text-sm border border-slate-200 transition-all shadow-xs active:scale-95"
+                    title="Limpar conversa e restaurar demonstração"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                        <path d="M3 3v5h5"/>
+                    </svg>
+                    <span>Reiniciar Demo</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Notificação Toast Flutuante -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+    <!-- Container Principal Split-Screen -->
+    <main class="flex-grow max-w-[1440px] w-full mx-auto px-4 sm:px-6 py-5 sm:py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+            <!-- ===================================================================== -->
+            <!-- LADO ESQUERDO: SIMULADOR DE SMARTPHONE (WHATSAPP DO PACIENTE)         -->
+            <!-- ===================================================================== -->
+            <section class="lg:col-span-5 flex flex-col items-center">
+                
+                <!-- Barra de Cenários Rápidos do Pitch -->
+                <div class="w-full max-w-[430px] bg-white rounded-2xl p-3 mb-4 border border-slate-200/90 shadow-xs">
+                    <div class="flex items-center justify-between mb-2 px-1">
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-petrol flex items-center gap-1.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-turquoise" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="5 3 19 12 5 21 5 3"/>
+                            </svg>
+                            Cenários Rápidos do Pitch
+                        </span>
+                        <span class="text-[11px] text-slate-400 font-medium">Clique para simular etapa</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-1.5">
+                        <button type="button" onclick="triggerScenario(1)" class="scenario-btn text-left px-2.5 py-2 rounded-xl bg-slate-50 hover:bg-teal-50 border border-slate-200/80 hover:border-turquoise/60 transition-all group">
+                            <span class="block text-[10px] font-bold text-turquoise-dark">ETAPA 1</span>
+                            <span class="block text-xs font-semibold text-petrol group-hover:text-petrol-dark truncate">Identificação &amp; LGPD</span>
+                        </button>
+                        <button type="button" onclick="triggerScenario(2)" class="scenario-btn text-left px-2.5 py-2 rounded-xl bg-slate-50 hover:bg-teal-50 border border-slate-200/80 hover:border-turquoise/60 transition-all group">
+                            <span class="block text-[10px] font-bold text-turquoise-dark">ETAPA 2</span>
+                            <span class="block text-xs font-semibold text-petrol group-hover:text-petrol-dark truncate">Foto Receita &amp; Lembrete</span>
+                        </button>
+                        <button type="button" onclick="triggerScenario(3)" class="scenario-btn text-left px-2.5 py-2 rounded-xl bg-slate-50 hover:bg-teal-50 border border-slate-200/80 hover:border-turquoise/60 transition-all group">
+                            <span class="block text-[10px] font-bold text-turquoise-dark">ETAPA 3</span>
+                            <span class="block text-xs font-semibold text-petrol group-hover:text-petrol-dark truncate">Pressão &amp; Relato UBS</span>
+                        </button>
+                        <button type="button" onclick="triggerScenario(4)" class="scenario-btn text-left px-2.5 py-2 rounded-xl bg-slate-50 hover:bg-rose-50 border border-slate-200/80 hover:border-rose-300 transition-all group">
+                            <span class="block text-[10px] font-bold text-rose-600">ETAPA 4</span>
+                            <span class="block text-xs font-semibold text-petrol group-hover:text-rose-800 truncate">Dúvida vs. Alerta SAMU</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Moldura Realista de Smartphone -->
+                <div class="w-full max-w-[430px] bg-slate-900 rounded-[2.6rem] p-3 shadow-2xl shadow-slate-900/20 border-[3px] border-slate-800 relative">
+                    <!-- Notch / Alto-falante superior -->
+                    <div class="w-28 h-5 bg-slate-900 rounded-b-2xl mx-auto absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center gap-2">
+                        <span class="w-10 h-1 bg-slate-700 rounded-full"></span>
+                        <span class="w-2 h-2 bg-slate-800 rounded-full border border-slate-700"></span>
+                    </div>
+
+                    <!-- Tela Interna do Smartphone -->
+                    <div class="bg-white rounded-[2rem] overflow-hidden flex flex-col h-[640px] border border-slate-700/40">
+                        
+                        <!-- Status Bar Android/iOS -->
+                        <div class="bg-wa-header text-white/90 px-5 pt-2.5 pb-1 flex items-center justify-between text-[11px] font-semibold">
+                            <span id="phone-clock">09:41</span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-[10px] bg-white/15 px-1.5 rounded">5G</span>
+                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21L15.6 16.2C14.6 15.45 13.35 15 12 15C10.65 15 9.4 15.45 8.4 16.2L12 21ZM12 3C7.95 3 4.21 4.34 1.2 6.6L3 9C5.5 7.12 8.62 6 12 6C15.38 6 18.5 7.12 21 9L22.8 6.6C19.79 4.34 16.05 3 12 3ZM12 9C9.3 9 6.81 9.89 4.8 11.4L6.6 13.8C8.1 12.67 9.97 12 12 12C14.03 12 15.9 12.67 17.4 13.8L19.2 11.4C17.19 9.89 14.7 9 12 9Z"/></svg>
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17 5v16H7V5h10m1-2H6a1 1 0 0 0-1 1v18a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1z"/><path d="M8 6h8v12H8z"/></svg>
+                            </div>
+                        </div>
+
+                        <!-- Barra Superior Estilo WhatsApp Oficial -->
+                        <div class="bg-wa-header text-white px-3.5 py-2.5 flex items-center justify-between shadow-md z-10">
+                            <div class="flex items-center gap-2.5">
+                                <!-- Avatar Oficial TôContigo -->
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-petrol to-turquoise flex items-center justify-center border-2 border-white/80 shrink-0 relative">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                                        <path d="M12 7v6"/>
+                                        <path d="M9 10h6"/>
+                                    </svg>
+                                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-wa-header absolute bottom-0 right-0"></span>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-1">
+                                        <span class="font-display font-bold text-sm leading-tight">TôContigo • SUS</span>
+                                        <!-- Selo Verificado Verde -->
+                                        <svg class="w-4 h-4 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="currentColor" title="Conta Oficial Verificada">
+                                            <path d="M12 2L14.8 4.2L18.4 3.8L19.6 7.2L22.6 9.2L21.6 12.6L22.6 16L19.6 18L18.4 21.4L14.8 21L12 23.2L9.2 21L5.6 21.4L4.4 18L1.4 16L2.4 12.6L1.4 9.2L4.4 7.2L5.6 3.8L9.2 4.2L12 2ZM10.5 16.2L17.2 9.5L15.8 8.1L10.5 13.4L8.2 11.1L6.8 12.5L10.5 16.2Z"/>
+                                        </svg>
+                                    </div>
+                                    <p id="bot-status-text" class="text-[11px] text-emerald-100/90 font-medium">online • Assistente Oficial de Saúde</p>
+                                </div>
+                            </div>
+
+                            <!-- Ícones de chamada/menu decorativos -->
+                            <div class="flex items-center gap-3 text-white/85">
+                                <button type="button" onclick="triggerScenario(4)" class="p-1.5 hover:bg-white/10 rounded-full transition-colors" title="Simular Emergência / SAMU">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Área de Mensagens do Chat -->
+                        <div id="chat-messages" class="flex-grow wa-chat-bg p-3.5 overflow-y-auto custom-scroll space-y-3 flex flex-col">
+                            <!-- Aviso de Criptografia WhatsApp -->
+                            <div class="bg-[#ffeecd] text-[#54656f] text-[11px] text-center px-3 py-2 rounded-xl shadow-2xs mx-auto max-w-[92%] leading-snug">
+                                🔒 As mensagens são protegidas com criptografia de ponta a ponta e seguem a <strong>LGPD do SUS</strong>.
+                            </div>
+                            <!-- Mensagens inseridas via JS -->
+                        </div>
+
+                        <!-- Indicador de "digitando..." -->
+                        <div id="typing-indicator" class="hidden wa-chat-bg px-4 pb-2">
+                            <div class="inline-flex items-center gap-1.5 bg-white px-3.5 py-2.5 rounded-2xl rounded-tl-xs shadow-xs">
+                                <span class="w-2 h-2 bg-slate-400 rounded-full dot-1"></span>
+                                <span class="w-2 h-2 bg-slate-400 rounded-full dot-2"></span>
+                                <span class="w-2 h-2 bg-slate-400 rounded-full dot-3"></span>
+                            </div>
+                        </div>
+
+                        <!-- Barra Inferior de Entrada de Mensagem -->
+                        <form id="chat-form" class="bg-[#f0f2f5] px-2.5 py-2 flex items-center gap-2 border-t border-slate-200/80">
+                            <!-- Botão Simulado de Anexo / Foto de Receita -->
+                            <button 
+                                type="button" 
+                                onclick="simulatePrescriptionUpload()" 
+                                class="p-2.5 rounded-full text-slate-600 hover:bg-slate-200/80 hover:text-petrol transition-colors shrink-0" 
+                                title="Simular envio de foto da prescrição médica"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+                                    <circle cx="12" cy="13" r="3"/>
+                                </svg>
+                            </button>
+
+                            <input 
+                                type="text" 
+                                id="chat-input" 
+                                placeholder="Digite uma mensagem..." 
+                                autocomplete="off"
+                                class="flex-grow bg-white text-slate-800 placeholder-slate-400 text-sm px-4 py-2.5 rounded-full border border-slate-200/80 focus:outline-none focus:border-turquoise"
+                            >
+
+                            <button 
+                                type="submit" 
+                                class="w-10 h-10 rounded-full bg-wa-teal hover:bg-wa-header text-white flex items-center justify-center shadow-xs transition-colors shrink-0"
+                                aria-label="Enviar mensagem"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 translate-x-0.5" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                                </svg>
+                            </button>
+                        </form>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===================================================================== -->
+            <!-- LADO DIREITO: PAINEL DO PROFISSIONAL DE SAÚDE (UBS CENTRO)            -->
+            <!-- ===================================================================== -->
+            <section class="lg:col-span-7 space-y-5">
+                
+                <!-- Barra Superior da Unidade de Referência -->
+                <div class="bg-gradient-to-r from-petrol to-petrol-light rounded-2xl p-5 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-0.5 rounded-md bg-white/15 text-teal-200 text-xs font-bold uppercase tracking-wider">
+                                Unidade de Referência
+                            </span>
+                            <span class="inline-flex items-center gap-1 text-xs text-emerald-300 font-medium">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Aberta até 17:00
+                            </span>
+                        </div>
+                        <h2 class="font-display text-xl sm:text-2xl font-bold mt-1">
+                            UBS Centro • Prontuário Integrado TôContigo
+                        </h2>
+                        <p class="text-xs sm:text-sm text-teal-100/90 mt-0.5">
+                            Painel de acompanhamento contínuo sincronizado com o WhatsApp do cidadão
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2 bg-white/10 backdrop-blur-xs px-3.5 py-2.5 rounded-xl border border-white/15 shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-turquoise-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                        <div class="text-xs">
+                            <span class="block font-bold text-white">Base GEMUS / SUS</span>
+                            <span class="text-teal-200">Auditoria Ativa</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card de Identificação da Paciente (Dona Maria) -->
+                <div id="patient-profile-card" class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs transition-all">
+                    <div class="flex flex-wrap items-start justify-between gap-4">
+                        <div class="flex items-center gap-3.5">
+                            <div class="w-12 h-12 rounded-2xl bg-teal-50 border border-teal-200 text-petrol font-display font-extrabold text-lg flex items-center justify-center shrink-0">
+                                MS
+                            </div>
+                            <div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <h3 class="font-display font-bold text-lg text-petrol">Maria da Silva</h3>
+                                    <span id="lgpd-badge" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                        Aguardando Confirmação SUS
+                                    </span>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 mt-1">
+                                    <span><strong class="text-slate-700">CPF:</strong> 123.456.789-00</span>
+                                    <span><strong class="text-slate-700">Nasc.:</strong> 14/05/1958 (68 anos)</span>
+                                    <span><strong class="text-slate-700">Endereço:</strong> Rua das Flores, 123</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-right">
+                            <span class="block text-[11px] font-semibold text-slate-400 uppercase">Vínculo Territorial</span>
+                            <span class="inline-flex items-center gap-1 text-xs font-bold text-petrol bg-slate-100 px-2.5 py-1 rounded-lg mt-0.5">
+                                📍 UBS Centro
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grid Intermediário: Lembretes Ativos & Formulário Clínico -->
+                <div class="grid grid-cols-1 xl:grid-cols-12 gap-5">
+                    
+                    <!-- Coluna 1: Lembretes de Medicação Ativos (RF-18 / RF-19) -->
+                    <div class="xl:col-span-5 bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="font-display font-bold text-sm text-petrol flex items-center gap-2">
+                                    <span class="w-7 h-7 rounded-lg bg-teal-50 text-turquoise-dark flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/>
+                                            <path d="m8.5 8.5 7 7"/>
+                                        </svg>
+                                    </span>
+                                    Lembretes de Medicação
+                                </h3>
+                                <span id="meds-count" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">0 ativos</span>
+                            </div>
+
+                            <div id="medications-list" class="space-y-2.5">
+                                <!-- Estado vazio inicial -->
+                                <div id="meds-empty" class="border border-dashed border-slate-200 rounded-xl p-4 text-center">
+                                    <p class="text-xs text-slate-500">Nenhum lembrete ativo no momento.</p>
+                                    <p class="text-[11px] text-slate-400 mt-1">Quando a paciente confirmar uma prescrição no WhatsApp, ela aparecerá aqui.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center gap-1.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-turquoise shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+                            </svg>
+                            <span>O bot organiza apenas horários; doses não são alteradas.</span>
+                        </div>
+                    </div>
+
+                    <!-- Coluna 2: Formulário Rápido de Anotações Clínicas (Solicitado anteriormente) -->
+                    <div class="xl:col-span-7 bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="font-display font-bold text-sm text-petrol flex items-center gap-2">
+                                <span class="w-7 h-7 rounded-lg bg-petrol/10 text-petrol flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                    </svg>
+                                </span>
+                                Anotações Clínicas / Registro do Atendimento
+                            </h3>
+                        </div>
+
+                        <form id="clinical-form" class="space-y-3" novalidate>
+                            <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                                <div class="sm:col-span-7">
+                                    <label for="doc-nome" class="block text-xs font-semibold text-petrol mb-1">Nome do Paciente</label>
+                                    <input 
+                                        type="text" 
+                                        id="doc-nome" 
+                                        value="Maria da Silva"
+                                        placeholder="Nome completo"
+                                        class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50/70 text-slate-800 text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-turquoise"
+                                    >
+                                </div>
+                                <div class="sm:col-span-5">
+                                    <label for="doc-cpf" class="block text-xs font-semibold text-petrol mb-1">CPF</label>
+                                    <input 
+                                        type="text" 
+                                        id="doc-cpf" 
+                                        value="123.456.789-00"
+                                        maxlength="14"
+                                        placeholder="000.000.000-00"
+                                        class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50/70 text-slate-800 text-xs sm:text-sm font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-turquoise"
+                                    >
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="doc-anotacoes" class="block text-xs font-semibold text-petrol mb-1">Anotações do Profissional</label>
+                                <textarea 
+                                    id="doc-anotacoes" 
+                                    rows="2" 
+                                    placeholder="Registre conduta médica, orientações ou evolução da consulta..."
+                                    class="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50/70 text-slate-800 text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-turquoise resize-none"
+                                ></textarea>
+                            </div>
+
+                            <div class="flex items-center justify-end gap-2 pt-1">
+                                <button 
+                                    type="button" 
+                                    id="doc-btn-cancelar"
+                                    class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold text-xs transition-colors"
+                                >
+                                    Cancelar
+                                </button>
+                                <button 
+                                    type="submit" 
+                                    id="doc-btn-salvar"
+                                    class="px-5 py-2 rounded-xl bg-gradient-to-r from-petrol to-turquoise-dark hover:from-petrol-dark hover:to-turquoise text-white font-display font-bold text-xs tracking-wide shadow-sm transition-all"
+                                >
+                                    SALVAR
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Histórico Cronológico em Tempo Real (Sincronizado com WhatsApp) -->
+                <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                        <div>
+                            <h3 class="font-display font-bold text-base text-petrol flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-turquoise"></span>
+                                Histórico Cronológico em Tempo Real
+                            </h3>
+                            <p class="text-xs text-slate-500">Registros enviados pela paciente via WhatsApp e evoluções da equipe UBS</p>
+                        </div>
+                        <span id="timeline-count" class="text-xs font-bold px-3 py-1 rounded-full bg-petrol/10 text-petrol">1 registro</span>
+                    </div>
+
+                    <div id="timeline-list" class="space-y-3 max-h-[300px] overflow-y-auto custom-scroll pr-1">
+                        <!-- Itens renderizados via JS -->
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </main>
+
+    <!-- Lógica Completa da Simulação Interativa -->
+    <script>
+        // =========================================================================
+        // ESTADO DA APLICAÇÃO
+        // =========================================================================
+        const state = {
+            lgpdConfirmed: false,
+            prescriptionPending: false,
+            pressurePending: false,
+            medications: [],
+            timeline: []
+        };
+
+        // Referências DOM
+        const chatMessages = document.getElementById('chat-messages');
+        const typingIndicator = document.getElementById('typing-indicator');
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+
+        const lgpdBadge = document.getElementById('lgpd-badge');
+        const medsList = document.getElementById('medications-list');
+        const medsCount = document.getElementById('meds-count');
+        const timelineList = document.getElementById('timeline-list');
+        const timelineCount = document.getElementById('timeline-count');
+
+        const docForm = document.getElementById('clinical-form');
+        const docNome = document.getElementById('doc-nome');
+        const docCpf = document.getElementById('doc-cpf');
+        const docAnotacoes = document.getElementById('doc-anotacoes');
+        const docBtnCancelar = document.getElementById('doc-btn-cancelar');
+
+        // =========================================================================
+        // UTILITÁRIOS DE TEMPO E UI
+        // =========================================================================
+        function getCurrentTime() {
+            return new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function escapeHTML(str) {
+            return String(str).replace(/[&<>'"]/g, tag => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+            }[tag]));
+        }
+
+        function showToast(title, subtitle = '', type = 'teal') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const colors = type === 'alert' 
+                ? 'bg-rose-600 text-white border-rose-700' 
+                : type === 'neutral'
+                ? 'bg-slate-800 text-white border-slate-700'
+                : 'bg-petrol text-white border-turquoise';
+
+            toast.className = `pointer-events-auto p-3.5 rounded-2xl shadow-lg border-l-4 ${colors} flex items-start gap-3 transition-all duration-300 transform translate-y-2 opacity-0`;
+            toast.innerHTML = `
+                <div class="mt-0.5 shrink-0">
+                    ${type === 'alert' 
+                        ? '<svg class="w-5 h-5 text-rose-200" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>'
+                        : '<svg class="w-5 h-5 text-turquoise" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+                    }
+                </div>
+                <div class="text-xs">
+                    <p class="font-bold text-sm">${escapeHTML(title)}</p>
+                    ${subtitle ? `<p class="opacity-90 mt-0.5 leading-snug">${escapeHTML(subtitle)}</p>` : ''}
+                </div>
+            `;
+
+            container.appendChild(toast);
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        function scrollChatToBottom() {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // =========================================================================
+        // RENDERIZAÇÃO DE MENSAGENS DO CHAT (WHATSAPP)
+        // =========================================================================
+        function addUserMessage(text, attachmentHtml = '') {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'self-end max-w-[85%] flex flex-col items-end';
+
+            wrapper.innerHTML = `
+                <div class="bg-wa-sent text-slate-800 px-3.5 py-2 rounded-2xl rounded-tr-xs shadow-xs text-[13px] leading-relaxed">
+                    ${attachmentHtml}
+                    <div>${escapeHTML(text).replace(/\n/g, '<br>')}</div>
+                    <div class="flex items-center justify-end gap-1 mt-1 text-[10px] text-slate-500">
+                        <span>${getCurrentTime()}</span>
+                        <!-- Ticks azuis de leitura -->
+                        <svg class="w-3.5 h-3.5 text-sky-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="18 6 7 17 2 12"/>
+                            <polyline points="22 10 13 19 11 17"/>
+                        </svg>
+                    </div>
+                </div>
+            `;
+            chatMessages.appendChild(wrapper);
+            scrollChatToBottom();
+        }
+
+        function addBotMessage(htmlContent, quickButtons = [], isAlert = false) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'self-start max-w-[88%] flex flex-col items-start';
+
+            const bubbleStyle = isAlert 
+                ? 'bg-rose-50 border-2 border-rose-500 text-rose-950' 
+                : 'bg-white text-slate-800';
+
+            let buttonsHtml = '';
+            if (quickButtons.length > 0) {
+                buttonsHtml = `<div class="mt-2 pt-2 border-t ${isAlert ? 'border-rose-200' : 'border-slate-100'} flex flex-col gap-1.5">`;
+                quickButtons.forEach(btn => {
+                    const btnColor = btn.variant === 'danger'
+                        ? 'bg-rose-600 hover:bg-rose-700 text-white font-bold shadow-xs'
+                        : btn.variant === 'primary'
+                        ? 'bg-teal-50 hover:bg-teal-100 text-petrol font-semibold border border-teal-200'
+                        : 'bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium border border-slate-200';
+                    
+                    buttonsHtml += `
+                        <button 
+                            type="button" 
+                            onclick="${btn.action}" 
+                            class="w-full text-center px-3 py-2 rounded-xl text-xs transition-colors ${btnColor}"
+                        >
+                            ${btn.label}
+                        </button>
+                    `;
+                });
+                buttonsHtml += `</div>`;
+            }
+
+            wrapper.innerHTML = `
+                <div class="${bubbleStyle} px-3.5 py-2.5 rounded-2xl rounded-tl-xs shadow-xs text-[13px] leading-relaxed">
+                    <div>${htmlContent}</div>
+                    ${buttonsHtml}
+                    <div class="flex items-center justify-end mt-1 text-[10px] ${isAlert ? 'text-rose-500' : 'text-slate-400'}">
+                        <span>${getCurrentTime()}</span>
+                    </div>
+                </div>
+            `;
+            chatMessages.appendChild(wrapper);
+            scrollChatToBottom();
+        }
+
+        function botReplyWithDelay(callback, delay = 650) {
+            typingIndicator.classList.remove('hidden');
+            scrollChatToBottom();
+            setTimeout(() => {
+                typingIndicator.classList.add('hidden');
+                callback();
+            }, delay);
+        }
+
+        // =========================================================================
+        // FLUXOS INTERATIVOS DOS CENÁRIOS DO HACKATHON
+        // =========================================================================
+
+        // Inicialização / Boas-vindas
+        function initWelcomeChat() {
+            chatMessages.innerHTML = `
+                <div class="bg-[#ffeecd] text-[#54656f] text-[11px] text-center px-3 py-2 rounded-xl shadow-2xs mx-auto max-w-[92%] leading-snug">
+                    🔒 As mensagens são protegidas com criptografia de ponta a ponta e seguem a <strong>LGPD do SUS</strong>.
+                </div>
+            `;
+
+            addBotMessage(
+                `Olá! Eu sou o <strong>TôContigo</strong>, seu assistente virtual integrado ao <strong>SUS</strong>. 💙<br><br>Estou aqui para ajudar com seus lembretes de remédios, registrar sua pressão e conectar você à sua unidade de saúde.<br><br>Para começar, precisamos do seu aceite de privacidade (LGPD). Podemos prosseguir?`,
+                [
+                    { label: '✅ Sim, aceito e quero continuar', action: 'handleConsentAccept()', variant: 'primary' },
+                    { label: '📄 Ver resumo da LGPD SUS', action: 'showLgpdInfo()', variant: 'secondary' }
+                ]
+            );
+        }
+
+        function showLgpdInfo() {
+            addUserMessage('Quero saber como meus dados são protegidos.');
+            botReplyWithDelay(() => {
+                addBotMessage(
+                    `🔒 <strong>Privacidade e Confidencialidade (LGPD):</strong><br>• Seus dados são tratados como dados sensíveis de saúde.<br>• Coletamos apenas o necessário para vincular você ao seu posto do SUS.<br>• Você pode consultar ou excluir seus registros a qualquer momento.`,
+                    [
+                        { label: '✅ Concordo, iniciar identificação', action: 'handleConsentAccept()', variant: 'primary' }
+                    ]
+                );
+            });
+        }
+
+        // ETAPA 1: Identificação & LGPD (Módulo A)
+        function handleConsentAccept() {
+            addUserMessage('Sim, aceito os termos da LGPD.');
+            botReplyWithDelay(() => {
+                addBotMessage(
+                    `Perfeito! Para localizar seu cadastro no <strong>SUS (GEMUS)</strong>, por favor confirme seu <strong>CPF</strong> e <strong>Data de Nascimento</strong>:`,
+                    [
+                        { label: '🪪 Enviar CPF: 123.456.789-00 • Nasc: 14/05/1958', action: 'confirmSusIdentity()', variant: 'primary' }
+                    ]
+                );
+            });
+        }
+
+        function confirmSusIdentity() {
+            addUserMessage('CPF: 123.456.789-00\nNascimento: 14/05/1958');
+            botReplyWithDelay(() => {
+                state.lgpdConfirmed = true;
+                updateRightPanelProfile();
+
+                addBotMessage(
+                    `Cadastro localizado com sucesso! ✅<br><br>👤 <strong>Nome:</strong> Maria da Silva<br>🏠 <strong>Endereço:</strong> Rua das Flores, 123<br>🏥 <strong>Unidade de Referência:</strong> <strong>UBS Centro</strong><br>⏰ <strong>Horário:</strong> Seg a Sex, das 07h às 17h<br><br>Seus dados estão corretos?`,
+                    [
+                        { label: '👍 Sim, estão corretos!', action: 'finishStage1()', variant: 'primary' },
+                        { label: '📸 Enviar foto de receita médica', action: 'simulatePrescriptionUpload()', variant: 'secondary' }
+                    ]
+                );
+            }, 800);
+        }
+
+        function finishStage1() {
+            addUserMessage('Sim, estão corretos!');
+            botReplyWithDelay(() => {
+                addBotMessage(
+                    `Ótimo, Dona Maria! Seu vínculo com a <strong>UBS Centro</strong> está ativo. Como posso te ajudar hoje?`,
+                    [
+                        { label: '💊 Cadastrar receita médica (Foto)', action: 'simulatePrescriptionUpload()', variant: 'primary' },
+                        { label: '🩺 Registrar minha pressão arterial', action: 'simulatePressurePrompt()', variant: 'secondary' },
+                        { label: '💉 Dúvida sobre vacina da gripe', action: 'askCuratedDoubt()', variant: 'secondary' }
+                    ]
+                );
+            });
+        }
+
+        // ETAPA 2: Foto da Receita & Lembretes (Módulo D)
+        function simulatePrescriptionUpload() {
+            const prescriptionCard = `
+                <div class="bg-white/90 border border-slate-200 rounded-xl p-2.5 mb-1.5 flex items-center gap-2.5">
+                    <div class="w-10 h-10 rounded-lg bg-teal-100 text-petrol flex items-center justify-center shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                        </svg>
+                    </div>
+                    <div class="text-left">
+                        <span class="block text-xs font-bold text-petrol">receita_ubs_centro.jpg</span>
+                        <span class="block text-[10px] text-slate-500">Prescrição Médica • SUS</span>
+                    </div>
+                </div>
+            `;
+            addUserMessage('Segue a foto da minha receita do posto.', prescriptionCard);
+
+            botReplyWithDelay(() => {
+                state.prescriptionPending = true;
+                addBotMessage(
+                    `Li sua prescrição! Veja o que identifiquei:<br><br>💊 <strong>Losartana Potássica 50mg</strong><br>⏰ <strong>Horários:</strong> 08:00 e 20:00 (todos os dias)<br><br>⚠️ <em>Aviso de segurança: apenas organizamos os horários prescritos, nunca alteramos doses.</em><br><br>Posso ativar esses lembretes para você?`,
+                    [
+                        { label: '✅ Sim, ativar lembretes', action: 'confirmMedicationReminder()', variant: 'primary' },
+                        { label: '✏️ Corrigir horário', action: 'editMedicationPrompt()', variant: 'secondary' }
+                    ]
+                );
+            }, 950);
+        }
+
+        function confirmMedicationReminder() {
+            addUserMessage('Sim, ativar lembretes.');
+            botReplyWithDelay(() => {
+                state.prescriptionPending = false;
+                
+                // Evita duplicar se clicar 2x no mesmo item
+                const exists = state.medications.some(m => m.name === 'Losartana Potássica 50mg');
+                if (!exists) {
+                    state.medications.push({
+                        name: 'Losartana Potássica 50mg',
+                        times: '08:00 e 20:00',
+                        status: 'Ativo via WhatsApp',
+                        confirmedAt: getCurrentTime()
+                    });
+                    renderMedications();
+                    addTimelineEntry({
+                        source: 'WhatsApp • Receita OCR',
+                        badgeColor: 'bg-teal-100 text-petrol',
+                        title: 'Lembrete de medicação ativado pela paciente',
+                        detail: 'Losartana Potássica 50mg — Horários programados: 08:00 e 20:00 (confirmado após leitura de prescrição).',
+                        isNew: true
+                    });
+                    showToast('Lembrete sincronizado!', 'Losartana 50mg adicionada ao prontuário da UBS Centro.');
+                }
+
+                addBotMessage(
+                    `Lembretes ativados com sucesso! 🔔<br>Vou te enviar uma mensagem às <strong>08:00</strong> e às <strong>20:00</strong> perguntando se já tomou seu remédio e se precisa de ajuda.`,
+                    [
+                        { label: '🩺 Registrar minha pressão agora', action: 'simulatePressurePrompt()', variant: 'primary' }
+                    ]
+                );
+            });
+        }
+
+        function editMedicationPrompt() {
+            addUserMessage('Quero ajustar o horário da noite para 21:00.');
+            botReplyWithDelay(() => {
+                state.medications = state.medications.filter(m => m.name !== 'Losartana Potássica 50mg');
+                state.medications.push({
+                    name: 'Losartana Potássica 50mg',
+                    times: '08:00 e 21:00',
+                    status: 'Ativo (ajustado)',
+                    confirmedAt: getCurrentTime()
+                });
+                renderMedications();
+                addTimelineEntry({
+                    source: 'WhatsApp • Ajuste Paciente',
+                    badgeColor: 'bg-teal-100 text-petrol',
+                    title: 'Lembrete ajustado e ativado',
+                    detail: 'Losartana Potássica 50mg — Horários: 08:00 e 21:00.',
+                    isNew: true
+                });
+                showToast('Horário atualizado!', 'Lembrete ajustado para 08:00 e 21:00 no painel UBS.');
+                addBotMessage(`Pronto! Ajustei para <strong>08:00 e 21:00</strong> e já ativei seus lembretes. ✅`);
+            });
+        }
+
+        // ETAPA 3: Registro de Pressão & Anotação Livre (Módulo C)
+        function simulatePressurePrompt() {
+            const msg = 'Minha pressão hoje deu 14/9 e senti uma tontura leve pela manhã.';
+            addUserMessage(msg);
+            processPressureReport(msg);
+        }
+
+        function processPressureReport(rawText) {
+            botReplyWithDelay(() => {
+                state.pressurePending = true;
+                addBotMessage(
+                    `Entendi, Dona Maria. Conferindo seu registro antes de enviar para a equipe da <strong>UBS Centro</strong>:<br><br>🩺 <strong>Pressão Arterial:</strong> 140x90 mmHg (14/9)<br>📝 <strong>Relato ao médico:</strong> "${escapeHTML(rawText)}"<br><br>Confirma o envio dessas informações para seu prontuário?`,
+                    [
+                        { label: '✅ Confirmar e salvar no prontuário', action: 'confirmPressureSave()', variant: 'primary' },
+                        { label: '❌ Cancelar registro', action: 'cancelPressureSave()', variant: 'secondary' }
+                    ]
+                );
+            }, 750);
+        }
+
+        function confirmPressureSave() {
+            addUserMessage('Confirmo, pode salvar no prontuário.');
+            botReplyWithDelay(() => {
+                state.pressurePending = false;
+                addTimelineEntry({
+                    source: 'WhatsApp • Paciente',
+                    badgeColor: 'bg-emerald-100 text-emerald-800',
+                    title: 'Aferição de Pressão Arterial: 14/9 (140x90 mmHg)',
+                    detail: 'Relato da paciente: "Minha pressão hoje deu 14/9 e senti uma tontura leve pela manhã."',
+                    isNew: true
+                });
+
+                showToast('Novo registro recebido via WhatsApp!', 'Aferição 14/9 sincronizada no Painel da UBS Centro.');
+
+                addBotMessage(
+                    `Registro salvo e compartilhado com a <strong>UBS Centro</strong>! 📋✅<br>O médico e a equipe de enfermagem já podem visualizar essa anotação na sua próxima avaliação.<br><br>Deseja tirar alguma dúvida ou falar com um atendente do posto?`,
+                    [
+                        { label: '💉 Perguntar sobre vacina da gripe', action: 'askCuratedDoubt()', variant: 'secondary' },
+                        { label: '🚨 Simular sinal de alerta (Dor no peito)', action: 'triggerEmergencyAlert()', variant: 'danger' }
+                    ]
+                );
+            });
+        }
+
+        function cancelPressureSave() {
+            addUserMessage('Cancelar registro.');
+            botReplyWithDelay(() => {
+                state.pressurePending = false;
+                addBotMessage('Tudo bem! O registro foi descartado e não foi salvo no seu histórico.');
+            });
+        }
+
+        // ETAPA 4: Dúvida Base Curada vs. Sinal de Alerta SAMU (Módulo B)
+        function askCuratedDoubt() {
+            addUserMessage('Quem tem pressão alta pode tomar a vacina da gripe?');
+            botReplyWithDelay(() => {
+                addBotMessage(
+                    `📚 <strong>Resposta da Base Oficial SUS:</strong><br><br><strong>Sim!</strong> Pessoas com hipertensão (pressão alta) fazem parte do grupo prioritário e <strong>devem</strong> tomar a vacina contra a gripe (Influenza), pois ela previne complicações respiratórias graves.<br><br>📍 Você pode se vacinar na <strong>UBS Centro</strong> hoje até as <strong>17:00</strong> levando seu CPF ou Cartão do SUS.<br><em>Fonte: Calendário Nacional de Vacinação — Ministério da Saúde.</em>`,
+                    [
+                        { label: '🚨 Testar detecção de Sinal de Alerta (SAMU)', action: 'triggerEmergencyAlert()', variant: 'danger' }
+                    ]
+                );
+            }, 850);
+        }
+
+        function triggerEmergencyAlert() {
+            addUserMessage('Estou sentindo uma dor forte no peito e falta de ar agora.');
+            botReplyWithDelay(() => {
+                addTimelineEntry({
+                    source: 'ALERTA CRÍTICO • WhatsApp',
+                    badgeColor: 'bg-rose-100 text-rose-800',
+                    title: 'Sinal de Alerta Detectado — Orientado SAMU 192',
+                    detail: 'Paciente relatou dor torácica e dispneia. Protocolo automático de emergência acionado.',
+                    isNew: true,
+                    isCritical: true
+                });
+
+                showToast('ALERTA DE EMERGÊNCIA DETECTADO', 'Paciente orientada a acionar SAMU 192 imediatamente.', 'alert');
+
+                addBotMessage(
+                    `🚨 <strong>ATENÇÃO: SINAL DE ALERTA DETECTADO!</strong><br><br>Dor forte no peito e falta de ar exigem avaliação médica imediata. <strong>Não espere resposta pelo chat.</strong><br><br>🚑 <strong>Ligue imediatamente para o SAMU: 192</strong><br>🏥 <strong>UPA 24h mais próxima:</strong> UPA Centro-Sul — Av. Brasil, 850 (a 1,8 km do seu endereço).`,
+                    [
+                        { label: '📞 LIGAR AGORA PARA O SAMU (192)', action: 'simulateSamuCall()', variant: 'danger' }
+                    ],
+                    true
+                );
+            }, 600);
+        }
+
+        function simulateSamuCall() {
+            showToast('Discando para SAMU 192...', 'Chamada de emergência simulada para demonstração do pitch.', 'alert');
+        }
+
+        // Atalhos da Barra de Cenários do Pitch (1 clique)
+        function triggerScenario(step) {
+            if (step === 1) {
+                if (!state.lgpdConfirmed) {
+                    confirmSusIdentity();
+                } else {
+                    addBotMessage('A identificação de <strong>Maria da Silva</strong> (UBS Centro) já está confirmada! ✅');
+                }
+            } else if (step === 2) {
+                if (!state.lgpdConfirmed) {
+                    state.lgpdConfirmed = true;
+                    updateRightPanelProfile();
+                }
+                simulatePrescriptionUpload();
+            } else if (step === 3) {
+                if (!state.lgpdConfirmed) {
+                    state.lgpdConfirmed = true;
+                    updateRightPanelProfile();
+                }
+                simulatePressurePrompt();
+            } else if (step === 4) {
+                askCuratedDoubt();
+            }
+        }
+
+        // =========================================================================
+        // INTERAÇÃO POR TEXTO LIVRE NO CHAT
+        // =========================================================================
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            chatInput.value = '';
+            addUserMessage(text);
+
+            const lower = text.toLowerCase();
+
+            // Detecção simples de intenção para tornar a demo ao vivo natural
+            if (lower.includes('peito') || lower.includes('falta de ar') || lower.includes('desmaio') || lower.includes('infarto')) {
+                botReplyWithDelay(() => {
+                    addBotMessage(
+                        `🚨 <strong>SINAL DE ALERTA DETECTADO!</strong><br>Procure atendimento de urgência imediatamente.<br>🚑 <strong>SAMU: 192</strong> | 🏥 <strong>UPA 24h Centro-Sul:</strong> Av. Brasil, 850.`,
+                        [{ label: '📞 LIGAR SAMU (192)', action: 'simulateSamuCall()', variant: 'danger' }],
+                        true
+                    );
+                });
+            } else if (lower.includes('pressão') || lower.includes('pressao') || /\d{2}\/\d/.test(lower)) {
+                processPressureReport(text);
+            } else if (lower.includes('vacina') || lower.includes('gripe')) {
+                botReplyWithDelay(() => {
+                    addBotMessage(
+                        `📚 <strong>Base Curada SUS:</strong> A vacina contra a gripe está disponível gratuitamente na <strong>UBS Centro</strong> (07h às 17h) para idosos e hipertensos.`
+                    );
+                });
+            } else if (lower.includes('atendente') || lower.includes('humano') || lower.includes('médico') || lower.includes('medico')) {
+                botReplyWithDelay(() => {
+                    addBotMessage(
+                        `👩‍⚕️ Transferindo seu atendimento para a recepção da <strong>UBS Centro</strong> (horário ativo até 17:00).<br>Já enviei o resumo do seu histórico para agilizar o acolhimento!`
+                    );
+                });
+            } else {
+                botReplyWithDelay(() => {
+                    addBotMessage(
+                        `Não encontrei essa resposta específica na minha base validada do SUS, e para sua segurança eu nunca invento orientações médicas. 🛡️<br><br>Posso transferir você para o <strong>atendimento humano da UBS Centro</strong> ou registrar essa mensagem para o seu médico?`,
+                        [
+                            { label: '👩‍⚕️ Falar com atendente da UBS Centro', action: 'requestHumanSupport()', variant: 'primary' },
+                            { label: '📝 Salvar como anotação para o médico', action: `saveFreeNoteToUbs('${escapeHTML(text).replace(/'/g, "\\'")}')`, variant: 'secondary' }
+                        ]
+                    );
+                });
+            }
+        });
+
+        function requestHumanSupport() {
+            addUserMessage('Quero falar com um atendente da UBS Centro.');
+            botReplyWithDelay(() => {
+                addBotMessage(
+                    `✅ Solicitação encaminhada para a equipe da <strong>UBS Centro</strong> com o contexto da sua conversa. Tempo estimado de resposta: <strong>4 minutos</strong>.`
+                );
+            });
+        }
+
+        function saveFreeNoteToUbs(noteText) {
+            addUserMessage('Salvar essa mensagem para o médico.');
+            botReplyWithDelay(() => {
+                addTimelineEntry({
+                    source: 'WhatsApp • Relato Livre',
+                    badgeColor: 'bg-teal-100 text-petrol',
+                    title: 'Anotação enviada pela paciente para consulta',
+                    detail: `"${noteText}"`,
+                    isNew: true
+                });
+                showToast('Relato salvo no prontuário!', 'Mensagem disponível para o médico da UBS Centro.');
+                addBotMessage('Prontinho! Sua mensagem já está anexada ao seu histórico na <strong>UBS Centro</strong>. ✅');
+            });
+        }
+
+        // =========================================================================
+        // ATUALIZAÇÃO DO PAINEL DO PROFISSIONAL DE SAÚDE (LADO DIREITO)
+        // =========================================================================
+        function updateRightPanelProfile() {
+            if (state.lgpdConfirmed) {
+                lgpdBadge.className = 'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200';
+                lgpdBadge.innerHTML = '✅ Consentimento LGPD Ativo';
+            } else {
+                lgpdBadge.className = 'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200';
+                lgpdBadge.innerHTML = 'Aguardando Confirmação SUS';
+            }
+        }
+
+        function renderMedications() {
+            medsCount.textContent = `${state.medications.length} ${state.medications.length === 1 ? 'ativo' : 'ativos'}`;
+
+            if (state.medications.length === 0) {
+                medsList.innerHTML = `
+                    <div id="meds-empty" class="border border-dashed border-slate-200 rounded-xl p-4 text-center">
+                        <p class="text-xs text-slate-500">Nenhum lembrete ativo no momento.</p>
+                        <p class="text-[11px] text-slate-400 mt-1">Quando a paciente confirmar uma prescrição no WhatsApp, ela aparecerá aqui.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            medsList.innerHTML = state.medications.map(med => `
+                <div class="p-3 rounded-xl bg-teal-50/70 border border-teal-200/80 sync-highlight">
+                    <div class="flex items-start justify-between gap-2">
+                        <div>
+                            <h4 class="font-display font-bold text-xs sm:text-sm text-petrol">${escapeHTML(med.name)}</h4>
+                            <p class="text-xs text-slate-600 mt-0.5">⏰ Horários: <strong>${escapeHTML(med.times)}</strong></p>
+                        </div>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 shrink-0">
+                            ${escapeHTML(med.status)}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addTimelineEntry(entry) {
+            state.timeline.unshift({
+                ...entry,
+                time: getCurrentTime()
+            });
+            renderTimeline();
+        }
+
+        function renderTimeline() {
+            timelineCount.textContent = `${state.timeline.length} ${state.timeline.length === 1 ? 'registro' : 'registros'}`;
+
+            timelineList.innerHTML = state.timeline.map(item => `
+                <div class="p-3.5 rounded-xl border ${item.isCritical ? 'border-rose-300 bg-rose-50/50' : 'border-slate-200/90 bg-white'} ${item.isNew ? 'sync-highlight' : ''} shadow-2xs">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${item.badgeColor}">
+                                ${escapeHTML(item.source)}
+                            </span>
+                            ${item.isNew ? '<span class="text-[10px] font-bold text-turquoise-dark">• Sincronizado agora</span>' : ''}
+                        </div>
+                        <span class="text-[11px] font-mono text-slate-400">Hoje, ${item.time}</span>
+                    </div>
+                    <h4 class="font-display font-bold text-xs sm:text-sm ${item.isCritical ? 'text-rose-900' : 'text-petrol'}">
+                        ${escapeHTML(item.title)}
+                    </h4>
+                    <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                        ${escapeHTML(item.detail)}
+                    </p>
+                </div>
+            `).join('');
+
+            // Limpa flag isNew após renderizar
+            state.timeline.forEach(t => t.isNew = false);
+        }
+
+        // =========================================================================
+        // FORMULÁRIO CLÍNICO DO PROFISSIONAL (SALVAR E CANCELAR)
+        // =========================================================================
+        docCpf.addEventListener('input', (e) => {
+            let v = e.target.value.replace(/\D/g, '').slice(0, 11);
+            v = v.replace(/(\d{3})(\d)/, '$1.$2');
+            v = v.replace(/(\d{3})(\d)/, '$1.$2');
+            v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            e.target.value = v;
+        });
+
+        docForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nome = docNome.value.trim();
+            const cpf = docCpf.value.trim();
+            const anotacoes = docAnotacoes.value.trim();
+
+            if (!nome || cpf.replace(/\D/g, '').length !== 11 || !anotacoes) {
+                showToast('Preencha todos os campos', 'Informe Nome, CPF válido e as anotações clínicas.', 'alert');
+                return;
+            }
+
+            addTimelineEntry({
+                source: 'UBS Centro • Médico/Enf.',
+                badgeColor: 'bg-petrol text-white',
+                title: `Evolução Clínica — ${nome} (CPF: ${cpf})`,
+                detail: anotacoes,
+                isNew: true
+            });
+
+            docAnotacoes.value = '';
+            showToast('Anotação clínica salva!', `Prontuário de ${nome} atualizado com sucesso.`);
+        });
+
+        docBtnCancelar.addEventListener('click', () => {
+            docAnotacoes.value = '';
+            showToast('Anotação limpa', 'O campo de observação clínica foi cancelado.', 'neutral');
+        });
+
+        // =========================================================================
+        // REINICIAR DEMONSTRAÇÃO COMPLETA
+        // =========================================================================
+        function resetDemo() {
+            state.lgpdConfirmed = false;
+            state.prescriptionPending = false;
+            state.pressurePending = false;
+            state.medications = [];
+            state.timeline = [
+                {
+                    source: 'Base SUS • GEMUS',
+                    badgeColor: 'bg-slate-100 text-slate-700',
+                    title: 'Cadastro Territorial Vinculado',
+                    detail: 'Paciente vinculada à UBS Centro. Histórico ambulatorial pronto para integração.',
+                    time: '08:00',
+                    isNew: false
+                }
+            ];
+
+            docNome.value = 'Maria da Silva';
+            docCpf.value = '123.456.789-00';
+            docAnotacoes.value = '';
+
+            updateRightPanelProfile();
+            renderMedications();
+            renderTimeline();
+            initWelcomeChat();
+            showToast('Demonstração reiniciada!', 'Pronto para apresentar o fluxo desde o início.');
+        }
+
+        // Inicializa o mockup ao carregar a página
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('phone-clock').textContent = getCurrentTime();
+            resetDemo();
+        });
+    </script>
+</body>
+</html>
